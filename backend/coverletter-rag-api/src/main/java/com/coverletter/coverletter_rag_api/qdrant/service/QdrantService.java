@@ -1,7 +1,8 @@
 package com.coverletter.coverletter_rag_api.qdrant.service;
 
 import com.coverletter.coverletter_rag_api.experience.domain.entity.ExperienceEntity;
-import com.coverletter.coverletter_rag_api.qdrant.dto.QdrantExperienceSearchResult;
+import com.coverletter.coverletter_rag_api.qdrant.domain.dto.QdrantExperienceSearchResult;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
