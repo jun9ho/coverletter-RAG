@@ -1,0 +1,28 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: coverletter-mariadb
+    restart: unless-stopped
+    ports:
+      - "3310:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: coverletter-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  mariadb_data:
+  qdrant_data:
