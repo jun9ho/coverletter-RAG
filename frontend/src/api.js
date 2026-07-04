@@ -17,4 +17,8 @@ export const generateCoverLetter = async (data) => {
   return response.data;
 };
 
+export const extractExperiences = async (data) => {
+  const response = await api.post("/api/documents/extract-experiences", data);
+  return response.data;
+};
 export default api;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createExperience, generateCoverLetter } from "./api";
+import { createExperience, extractExperiences, generateCoverLetter } from "./api";
 import "./App.css";
 
 function App() {
@@ -20,6 +20,64 @@ function App() {
 
   const [generatedResult, setGeneratedResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [longText, setLongText] = useState("");
+  const [extractedExperiences, setExtractedExperiences] = useState([]);
+  const [extractLoading, setExtractLoading] = useState(false);
+
+  const handleExtractExperiences = async (e) => {
+    e.preventDefault();
+
+    if (!longText.trim()) {
+      alert("추출할 텍스트를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setExtractLoading(true);
+
+      const result = await extractExperiences({
+        content: longText,
+      });
+
+      setExtractedExperiences(result.extractedExperiences || []);
+    } catch (error) {
+      console.error(error);
+
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+
+      alert(`경험 추출에 실패했습니다.\nstatus: ${status}\nmessage: ${message}`);
+    } finally {
+      setExtractLoading(false);
+    }
+  };
+
+  const handleSaveExtractedExperience = async (experience) => {
+    try {
+      await createExperience({
+        title: experience.title || "",
+        category: experience.category || "",
+        period: experience.period || "",
+        content: experience.content || "",
+        tags: experience.tags || [],
+      });
+
+      alert("경험이 저장되었습니다.");
+    } catch (error) {
+      console.error(error);
+
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+
+      alert(`경험 저장에 실패했습니다.\nstatus: ${status}\nmessage: ${message}`);
+    }
+  };
 
   const handleExperienceChange = (e) => {
     const { name, value } = e.target;
@@ -102,7 +160,64 @@ function App() {
         <h1>CoverLetter RAG</h1>
         <p>내 경험 기반 자기소개서 생성 서비스</p>
       </header>
+      <section className="card">
+        <h2>긴 텍스트에서 경험 추출</h2>
+        <p className="description">
+          이력서, 자기소개서, 포트폴리오 내용을 붙여넣으면 LLM이 경험 후보를 추출합니다.
+        </p>
 
+        <form onSubmit={handleExtractExperiences} className="form">
+          <textarea
+            name="longText"
+            placeholder="이력서, 자기소개서, 포트폴리오 내용을 붙여넣으세요."
+            value={longText}
+            onChange={(e) => setLongText(e.target.value)}
+            rows={10}
+          />
+
+          <button type="submit" disabled={extractLoading}>
+            {extractLoading ? "경험 추출 중..." : "경험 추출하기"}
+          </button>
+        </form>
+
+        {extractedExperiences.length > 0 && (
+          <div className="extracted-list">
+            <h3>추출된 경험 후보</h3>
+
+            {extractedExperiences.map((experience, index) => (
+              <div key={index} className="extracted-card">
+                <h4>{experience.title}</h4>
+
+                <p>
+                  <strong>카테고리:</strong> {experience.category || "없음"}
+                </p>
+
+                <p>
+                  <strong>기간:</strong> {experience.period || "없음"}
+                </p>
+
+                <p>{experience.content}</p>
+
+                <div className="tag-list">
+                  {(experience.tags || []).map((tag, tagIndex) => (
+                    <span key={tagIndex} className="tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSaveExtractedExperience(experience)}
+                >
+                  이 경험 저장하기
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+      
       <main className="container">
         <section className="card">
           <h2>1. 경험 등록</h2>
@@ -229,6 +344,7 @@ function App() {
             </div>
           </section>
         )}
+
       </main>
     </div>
   );

@@ -121,3 +121,47 @@ button:disabled {
   border-radius: 8px;
   border: 1px solid #e5e7eb;
 }
+.description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.extracted-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.extracted-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.extracted-card h4 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.extracted-card p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+}
