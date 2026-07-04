@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   createExperience,
   extractExperiences,
+  searchExperiences,
   generateCoverLetter,
 } from "./api";
 import "./App.css";
@@ -24,14 +25,20 @@ function App() {
 
   const [longText, setLongText] = useState("");
   const [extractedExperiences, setExtractedExperiences] = useState([]);
+
+  const [recommendedExperiences, setRecommendedExperiences] = useState([]);
+  const [selectedExperienceId, setSelectedExperienceId] = useState(null);
+
   const [generatedResult, setGeneratedResult] = useState(null);
 
   const [experienceLoading, setExperienceLoading] = useState(false);
   const [extractLoading, setExtractLoading] = useState(false);
+  const [recommendLoading, setRecommendLoading] = useState(false);
   const [generateLoading, setGenerateLoading] = useState(false);
 
   const handleExperienceChange = (e) => {
     const { name, value } = e.target;
+
     setExperienceForm((prev) => ({
       ...prev,
       [name]: value,
@@ -40,43 +47,15 @@ function App() {
 
   const handleCoverLetterChange = (e) => {
     const { name, value } = e.target;
+
     setCoverLetterForm((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
 
-  const handleCreateExperience = async (e) => {
-    e.preventDefault();
-
-    try {
-      setExperienceLoading(true);
-
-      await createExperience({
-        title: experienceForm.title,
-        category: experienceForm.category,
-        period: experienceForm.period,
-        content: experienceForm.content,
-        tags: experienceForm.tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      });
-
-      alert("경험이 저장되었습니다.");
-
-      setExperienceForm({
-        title: "",
-        category: "",
-        period: "",
-        content: "",
-        tags: "",
-      });
-    } catch (error) {
-      console.error(error);
-      alert("경험 저장에 실패했습니다.");
-    } finally {
-      setExperienceLoading(false);
+    if (name === "company" || name === "position" || name === "question") {
+      setSelectedExperienceId(null);
+      setRecommendedExperiences([]);
     }
   };
 
@@ -124,12 +103,101 @@ function App() {
       alert("추출된 경험이 저장되었습니다.");
     } catch (error) {
       console.error(error);
-      alert("경험 저장에 실패했습니다.");
+
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+
+      alert(`경험 저장에 실패했습니다.\nstatus: ${status}\nmessage: ${message}`);
+    }
+  };
+
+  const handleCreateExperience = async (e) => {
+    e.preventDefault();
+
+    try {
+      setExperienceLoading(true);
+
+      await createExperience({
+        title: experienceForm.title,
+        category: experienceForm.category,
+        period: experienceForm.period,
+        content: experienceForm.content,
+        tags: experienceForm.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+      });
+
+      alert("경험이 저장되었습니다.");
+
+      setExperienceForm({
+        title: "",
+        category: "",
+        period: "",
+        content: "",
+        tags: "",
+      });
+    } catch (error) {
+      console.error(error);
+
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+
+      alert(`경험 저장에 실패했습니다.\nstatus: ${status}\nmessage: ${message}`);
+    } finally {
+      setExperienceLoading(false);
+    }
+  };
+
+  const handleSearchRecommendedExperiences = async () => {
+    if (!coverLetterForm.question.trim()) {
+      alert("먼저 자기소개서 문항을 입력해주세요.");
+      return;
+    }
+
+    try {
+      setRecommendLoading(true);
+      setSelectedExperienceId(null);
+
+      const query = [
+        coverLetterForm.company,
+        coverLetterForm.position,
+        coverLetterForm.question,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      const result = await searchExperiences(query);
+
+      setRecommendedExperiences(result || []);
+    } catch (error) {
+      console.error(error);
+
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+
+      alert(`관련 경험 검색에 실패했습니다.\nstatus: ${status}\nmessage: ${message}`);
+    } finally {
+      setRecommendLoading(false);
     }
   };
 
   const handleGenerateCoverLetter = async (e) => {
     e.preventDefault();
+
+    if (!selectedExperienceId) {
+      alert("자기소개서에 사용할 경험을 먼저 선택해주세요.");
+      return;
+    }
 
     try {
       setGenerateLoading(true);
@@ -139,6 +207,7 @@ function App() {
         position: coverLetterForm.position,
         question: coverLetterForm.question,
         maxLength: Number(coverLetterForm.maxLength),
+        experienceId: selectedExperienceId,
       });
 
       setGeneratedResult(result);
@@ -158,6 +227,10 @@ function App() {
       setGenerateLoading(false);
     }
   };
+
+  const selectedExperience = recommendedExperiences.find(
+    (experience) => experience.experienceId === selectedExperienceId
+  );
 
   return (
     <div className="app">
@@ -180,7 +253,7 @@ function App() {
         <div className="side-card">
           <span>RAG Pipeline</span>
           <strong>MariaDB + Qdrant + OpenAI</strong>
-          <p>원본 경험을 저장하고 의미 기반으로 검색합니다.</p>
+          <p>Qdrant로 후보를 찾고, 선택한 경험 하나로 답변을 생성합니다.</p>
         </div>
       </aside>
 
@@ -190,23 +263,23 @@ function App() {
             <span className="eyebrow">Personal AX Service</span>
             <h2>내 경험을 기반으로 자기소개서 초안을 생성하세요.</h2>
             <p>
-              이력서, 포트폴리오, 자기소개서 내용을 경험 카드로 정리하고
-              RAG 검색을 통해 문항에 맞는 답변을 생성합니다.
+              이력서와 포트폴리오 내용을 경험 카드로 정리하고, 문항에 맞는
+              경험을 선택해 일관된 자기소개서 답변을 생성합니다.
             </p>
           </div>
 
           <div className="hero-stats">
             <div>
-              <strong>Vector RAG</strong>
-              <span>Qdrant 검색</span>
+              <strong>Top-K</strong>
+              <span>관련 경험 추천</span>
             </div>
             <div>
-              <strong>1536</strong>
-              <span>Embedding dimension</span>
+              <strong>1 Pick</strong>
+              <span>선택 경험 기반 생성</span>
             </div>
             <div>
-              <strong>AI Draft</strong>
-              <span>OpenAI Chat</span>
+              <strong>RAG</strong>
+              <span>Qdrant + OpenAI</span>
             </div>
           </div>
         </section>
@@ -222,8 +295,8 @@ function App() {
             </div>
 
             <p className="panel-desc">
-              이력서, 자기소개서, 포트폴리오 내용을 붙여넣으면 LLM이 경험
-              후보를 구조화합니다.
+              이력서, 자기소개서, 포트폴리오 내용을 붙여넣으면 LLM이
+              자기소개서에 활용 가능한 경험 후보를 구조화합니다.
             </p>
 
             <form onSubmit={handleExtractExperiences} className="form">
@@ -234,7 +307,11 @@ function App() {
                 rows={9}
               />
 
-              <button type="submit" className="primary-btn" disabled={extractLoading}>
+              <button
+                type="submit"
+                className="primary-btn"
+                disabled={extractLoading}
+              >
                 {extractLoading ? "경험 추출 중..." : "경험 추출하기"}
               </button>
             </form>
@@ -256,10 +333,13 @@ function App() {
                           {experience.period || "기간 없음"}
                         </p>
                       </div>
+
                       <button
                         type="button"
                         className="ghost-btn"
-                        onClick={() => handleSaveExtractedExperience(experience)}
+                        onClick={() =>
+                          handleSaveExtractedExperience(experience)
+                        }
                       >
                         저장
                       </button>
@@ -295,6 +375,7 @@ function App() {
                 placeholder="경험 제목"
                 value={experienceForm.title}
                 onChange={handleExperienceChange}
+                required
               />
 
               <div className="two-col">
@@ -304,6 +385,7 @@ function App() {
                   value={experienceForm.category}
                   onChange={handleExperienceChange}
                 />
+
                 <input
                   name="period"
                   placeholder="기간"
@@ -318,6 +400,7 @@ function App() {
                 value={experienceForm.content}
                 onChange={handleExperienceChange}
                 rows={7}
+                required
               />
 
               <input
@@ -343,7 +426,7 @@ function App() {
                 <span className="section-label">Step 03</span>
                 <h3>자기소개서 생성</h3>
               </div>
-              <span className="badge purple">RAG Generate</span>
+              <span className="badge purple">Select & Generate</span>
             </div>
 
             <form onSubmit={handleGenerateCoverLetter} className="form">
@@ -353,12 +436,15 @@ function App() {
                   placeholder="회사명"
                   value={coverLetterForm.company}
                   onChange={handleCoverLetterChange}
+                  required
                 />
+
                 <input
                   name="position"
                   placeholder="지원 직무"
                   value={coverLetterForm.position}
                   onChange={handleCoverLetterChange}
+                  required
                 />
               </div>
 
@@ -368,7 +454,63 @@ function App() {
                 value={coverLetterForm.question}
                 onChange={handleCoverLetterChange}
                 rows={7}
+                required
               />
+
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={handleSearchRecommendedExperiences}
+                disabled={recommendLoading}
+              >
+                {recommendLoading ? "관련 경험 찾는 중..." : "관련 경험 찾기"}
+              </button>
+
+              {recommendedExperiences.length > 0 && (
+                <div className="recommend-list">
+                  <div className="sub-header">
+                    <h4>관련 경험 후보</h4>
+                    <span>{recommendedExperiences.length}개</span>
+                  </div>
+
+                  {recommendedExperiences.map((experience) => (
+                    <button
+                      key={experience.experienceId}
+                      type="button"
+                      className={
+                        selectedExperienceId === experience.experienceId
+                          ? "recommend-card selected"
+                          : "recommend-card"
+                      }
+                      onClick={() =>
+                        setSelectedExperienceId(experience.experienceId)
+                      }
+                    >
+                      <div className="recommend-card-top">
+                        <strong>{experience.title}</strong>
+                        <em>
+                          score{" "}
+                          {experience.score?.toFixed?.(3) ?? experience.score}
+                        </em>
+                      </div>
+
+                      <p>
+                        {experience.category || "category 없음"} ·{" "}
+                        {experience.period || "기간 없음"}
+                      </p>
+
+                      <span>{experience.content}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {selectedExperience && (
+                <div className="selected-experience-box">
+                  <strong>선택한 경험</strong>
+                  <p>{selectedExperience.title}</p>
+                </div>
+              )}
 
               <input
                 name="maxLength"
@@ -381,9 +523,9 @@ function App() {
               <button
                 type="submit"
                 className="primary-btn"
-                disabled={generateLoading}
+                disabled={generateLoading || !selectedExperienceId}
               >
-                {generateLoading ? "생성 중..." : "자기소개서 생성하기"}
+                {generateLoading ? "생성 중..." : "선택한 경험으로 생성하기"}
               </button>
             </form>
           </article>
@@ -398,6 +540,7 @@ function App() {
                   {generatedResult.company} · {generatedResult.position}
                 </h3>
               </div>
+
               <span className="badge">Saved #{generatedResult.id}</span>
             </div>
 
@@ -414,6 +557,7 @@ function App() {
             {generatedResult.usedExperiences?.length > 0 && (
               <div className="used-box">
                 <strong>사용된 경험</strong>
+
                 <div className="used-list">
                   {generatedResult.usedExperiences.map((exp) => (
                     <div key={exp.experienceId} className="used-item">

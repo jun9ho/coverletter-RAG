@@ -1,6 +1,6 @@
 :root {
   --bg: #f4f7fb;
-  --card: rgba(255, 255, 255, 0.86);
+  --card: rgba(255, 255, 255, 0.88);
   --text: #172033;
   --muted: #6b7280;
   --line: #e5eaf2;
@@ -15,10 +15,22 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  max-width: none;
+  text-align: left;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 32%),
@@ -43,20 +55,32 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 .app {
   display: flex;
+  width: 100%;
   min-height: 100vh;
 }
+
+/* =========================
+   Sidebar
+========================= */
 
 .sidebar {
   position: sticky;
   top: 0;
-  width: 290px;
+  left: 0;
+  width: 320px;
+  min-width: 320px;
   height: 100vh;
   padding: 28px 22px;
   border-right: 1px solid rgba(226, 232, 240, 0.9);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(18px);
+  z-index: 10;
 }
 
 .logo-box {
@@ -141,19 +165,29 @@ button {
   line-height: 1.5;
 }
 
+/* =========================
+   Main Layout
+========================= */
+
 .main {
   flex: 1;
-  padding: 38px;
+  min-width: 0;
+  width: calc(100% - 320px);
+  padding: 40px 52px;
 }
+
+/* =========================
+   Hero
+========================= */
 
 .hero {
   display: flex;
   justify-content: space-between;
-  gap: 28px;
-  padding: 38px;
+  gap: 32px;
+  padding: 46px;
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.82);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
 }
@@ -170,15 +204,15 @@ button {
 }
 
 .hero h2 {
-  max-width: 680px;
+  max-width: 760px;
   margin: 0;
-  font-size: 38px;
+  font-size: 44px;
   line-height: 1.18;
   letter-spacing: -0.06em;
 }
 
 .hero p {
-  max-width: 680px;
+  max-width: 720px;
   margin: 18px 0 0;
   color: var(--muted);
   font-size: 16px;
@@ -187,20 +221,20 @@ button {
 
 .hero-stats {
   display: grid;
-  min-width: 230px;
-  gap: 12px;
+  min-width: 260px;
+  gap: 14px;
 }
 
 .hero-stats div {
-  padding: 18px;
+  padding: 22px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 20px;
   background: #ffffff;
 }
 
 .hero-stats strong {
   display: block;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .hero-stats span {
@@ -210,18 +244,23 @@ button {
   font-size: 13px;
 }
 
+/* =========================
+   Panels
+========================= */
+
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  margin-top: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 28px;
 }
 
 .panel,
 .result-panel {
-  padding: 26px;
+  min-width: 0;
+  padding: 32px;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 24px;
+  border-radius: 26px;
   background: var(--card);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
@@ -276,6 +315,10 @@ button {
   background: #ede9fe;
 }
 
+/* =========================
+   Form
+========================= */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -284,19 +327,20 @@ button {
 
 .two-col {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
 input,
 textarea {
   width: 100%;
+  min-width: 0;
   border: 1px solid #dbe2ea;
   outline: none;
   border-radius: 15px;
   padding: 14px 15px;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   transition: 0.2s ease;
 }
 
@@ -311,15 +355,20 @@ textarea:focus {
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
+/* =========================
+   Buttons
+========================= */
+
 .primary-btn,
-.ghost-btn {
-  border: none;
+.ghost-btn,
+.secondary-btn {
   border-radius: 15px;
   font-weight: 800;
   transition: 0.2s ease;
 }
 
 .primary-btn {
+  border: none;
   padding: 15px 18px;
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--purple));
@@ -332,12 +381,13 @@ textarea:focus {
 }
 
 .primary-btn:disabled {
-  cursor: not-allowed;
   opacity: 0.7;
   transform: none;
+  box-shadow: none;
 }
 
 .ghost-btn {
+  border: none;
   padding: 10px 14px;
   color: var(--primary);
   background: #eef4ff;
@@ -346,6 +396,25 @@ textarea:focus {
 .ghost-btn:hover {
   background: #dbeafe;
 }
+
+.secondary-btn {
+  border: 1px solid #c7d2fe;
+  padding: 14px 18px;
+  color: #2563eb;
+  background: #eef4ff;
+}
+
+.secondary-btn:hover {
+  background: #dbeafe;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.7;
+}
+
+/* =========================
+   Extracted Experiences
+========================= */
 
 .extracted-list {
   margin-top: 24px;
@@ -366,6 +435,7 @@ textarea:focus {
 }
 
 .experience-preview {
+  min-width: 0;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -408,10 +478,103 @@ textarea:focus {
   font-weight: 700;
 }
 
+/* =========================
+   Recommended Experience Cards
+========================= */
+
+.recommend-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.recommend-card {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: left;
+  background: #ffffff;
+  transition: 0.2s ease;
+}
+
+.recommend-card:hover {
+  border-color: rgba(37, 99, 235, 0.45);
+  background: #f8fbff;
+}
+
+.recommend-card.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.recommend-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recommend-card strong {
+  min-width: 0;
+  color: #111827;
+  font-size: 15px;
+}
+
+.recommend-card em {
+  flex-shrink: 0;
+  color: var(--primary);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.recommend-card p {
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.recommend-card span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.selected-experience-box {
+  padding: 14px 16px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 16px;
+  background: #eff6ff;
+}
+
+.selected-experience-box strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+
+.selected-experience-box p {
+  margin: 0;
+  color: #111827;
+  font-weight: 700;
+}
+
+/* =========================
+   Result
+========================= */
+
 .result-panel {
-  margin-top: 24px;
+  margin-top: 28px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.84)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.86)),
     #ffffff;
 }
 
@@ -470,7 +633,29 @@ textarea:focus {
   font-style: normal;
 }
 
-@media (max-width: 1080px) {
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 1180px) {
+  .main {
+    padding: 34px 36px;
+  }
+
+  .hero {
+    padding: 38px;
+  }
+
+  .hero h2 {
+    font-size: 38px;
+  }
+
+  .hero-stats {
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 860px) {
   .app {
     display: block;
   }
@@ -478,6 +663,7 @@ textarea:focus {
   .sidebar {
     position: relative;
     width: auto;
+    min-width: 0;
     height: auto;
     padding: 20px;
   }
@@ -494,6 +680,7 @@ textarea:focus {
   }
 
   .main {
+    width: 100%;
     padding: 22px;
   }
 
@@ -522,13 +709,22 @@ textarea:focus {
     font-size: 28px;
   }
 
+  .hero p {
+    font-size: 14px;
+  }
+
   .two-col {
     grid-template-columns: 1fr;
   }
 
   .panel-header,
   .result-header,
-  .preview-top {
+  .preview-top,
+  .recommend-card-top {
     flex-direction: column;
+  }
+
+  .hero-stats {
+    min-width: 0;
   }
 }

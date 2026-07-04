@@ -22,4 +22,11 @@ export const extractExperiences = async (data) => {
   return response.data;
 };
 
+export const searchExperiences = async (query) => {
+  const response = await api.get("/api/experiences/search", {
+    params: { query },
+  });
+  return response.data;
+};
+
 export default api;
