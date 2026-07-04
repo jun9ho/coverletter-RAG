@@ -34,6 +34,16 @@
  ┃   ┃   ┃       ┃   ┃ ┗ 📜ExperienceEntity.java
  ┃   ┃   ┃       ┃   ┗ 📂repository
  ┃   ┃   ┃       ┃     ┗ 📜ExperienceRepository.java
+ ┃   ┃   ┃       ┣ 📂document
+ ┃   ┃   ┃       ┃ ┣ 📂ctrl
+ ┃   ┃   ┃       ┃ ┃ ┗ 📜DocumentController.java
+ ┃   ┃   ┃       ┃ ┣ 📂service
+ ┃   ┃   ┃       ┃ ┃ ┗ 📜ExperienceExtractionService.java
+ ┃   ┃   ┃       ┃ ┗ 📂domain
+ ┃   ┃   ┃       ┃   ┗ 📂dto
+ ┃   ┃   ┃       ┃     ┣ 📜ExperienceExtractRequest.java
+ ┃   ┃   ┃       ┃     ┣ 📜ExperienceExtractResponse.java
+ ┃   ┃   ┃       ┃     ┗ 📜ExtractedExperienceDto.java
  ┃   ┃   ┃       ┣ 📂coverletter
  ┃   ┃   ┃       ┃ ┣ 📂ctrl
  ┃   ┃   ┃       ┃ ┃ ┗ 📜CoverLetterController.java
@@ -52,10 +62,13 @@
  ┃   ┃   ┃       ┃ ┣ 📜OpenAiEmbeddingService.java
  ┃   ┃   ┃       ┃ ┗ 📜OpenAiChatService.java
  ┃   ┃   ┃       ┣ 📂qdrant
- ┃   ┃   ┃       ┃ ┣ 📂dto
- ┃   ┃   ┃       ┃ ┃ ┗ 📜QdrantExperienceSearchResult.java
- ┃   ┃   ┃       ┃ ┣ 📂service
- ┃   ┃   ┃       ┃ ┃ ┗ 📜QdrantService.java
+ ┃   ┃   ┃       ┃ ┣ 📂domain
+ ┃   ┃   ┃       ┃drant
+ ┃   ┃   ┃       ┃ ┣ 📂domain
+ ┃   ┃   ┃       ┃ ┃ ┗ 📂dto
+ ┃   ┃   ┃       ┃ ┃   ┗ 📜QdrantExperienceSearchResult.java
+ ┃   ┃   ┃       ┃ ┗ 📂service
+ ┃   ┃   ┃       ┃   ┗ 📜QdrantService.java
  ┃   ┃   ┃       ┣ 📂global
  ┃   ┃   ┃       ┃ ┗ 📂config
  ┃   ┃   ┃       ┃   ┣ 📜RestClientConfig.java
@@ -69,9 +82,10 @@
  ┃ ┣ 📂src
  ┃ ┃ ┣ 📜api.js
  ┃ ┃ ┣ 📜App.jsx
- ┃ ┃ ┗ 📜App.css
+ ┃ ┃ ┣ 📜App.css
+ ┃ ┃ ┗ 📜index.css
  ┃ ┣ 📜package.json
- ┃ ┣ 📜package-lock.json
+ ┃ ┗ 📜package-lock.json
  ┃
  ┣ 📂infra
  ┃ ┗ 📜docker-compose.yml
@@ -121,9 +135,8 @@
 본 프로젝트는 간단한 React + Vite 프론트엔드를 제공합니다.
 
 ### 주요 화면
-<img width="654" height="370" alt="image" src="https://github.com/user-attachments/assets/115df77b-943a-42eb-a750-97e04eaa6dd8" />
-<img width="654" height="370" alt="image" src="https://github.com/user-attachments/assets/0c399a00-06ce-49f1-9f53-8ec89e2d7f28" />
-<img width="654" height="370" alt="image" src="https://github.com/user-attachments/assets/d5ad1e9c-c8f4-4446-b243-6789e296b474" />
+<img width="1534" height="477" alt="image" src="https://github.com/user-attachments/assets/e8a8185a-4e5d-4719-a2ec-9d2afb0567ed" />
+<img width="1514" height="593" alt="image" src="https://github.com/user-attachments/assets/0d84f221-35e3-4d94-aa86-ea7944de0b5e" />
 
 ---
 
@@ -132,11 +145,12 @@
 
 | Feature | Method | Endpoint | Description |
 |---|---|---|---|
-| Experience | POST | `/api/experiences` | 경험 카드 등록 |
+| Document | POST | `/api/documents/extract-experiences` | 긴 텍스트에서 경험 후보 추출 |
+| Experience | POST | `/api/experiences` | 경험 카드 등록 및 Qdrant vector 저장 |
 | Experience | GET | `/api/experiences` | 경험 목록 조회 |
 | Experience | GET | `/api/experiences/{id}` | 경험 단건 조회 |
-| Experience Search | GET | `/api/experiences/search?query={query}` | Qdrant 기반 의미 검색 |
-| Cover Letter | POST | `/api/cover-letters/generate` | RAG 기반 자기소개서 초안 생성 |
+| Experience Search | GET | `/api/experiences/search?query={query}` | Qdrant 기반 관련 경험 후보 검색 |
+| Cover Letter | POST | `/api/cover-letters/generate` | 선택한 경험 기반 자기소개서 초안 생성 |
 
 ---
 
@@ -145,7 +159,16 @@
 본 프로젝트는 사용자의 경험 데이터를 기반으로 자기소개서 답변을 생성하기 위해  
 **Retrieval-Augmented Generation** 구조를 적용했습니다.
 
-### 경험 등록 및 벡터 저장
+- ### 긴 텍스트에서 경험 후보 추출
+
+```text
+이력서 / 자기소개서 / 포트폴리오 텍스트 입력
+→ OpenAI Chat API 호출
+→ 자기소개서에 활용 가능한 경험 후보 추출
+→ 사용자가 확인 후 저장
+```
+
+- ### 경험 등록 및 벡터 저장
 
 ```text
 사용자 경험 입력
@@ -156,16 +179,29 @@
 → Qdrant에 vector + payload 저장
 ```
 
-### 의미 기반 경험 검색
+
+- ### 의미 기반 경험 후보 검색
 
 ```text
-자기소개서 문항 입력
-→ 문항을 embedding vector로 변환
-→ Qdrant에서 저장된 경험 vector들과 cosine similarity 비교
-→ 의미적으로 관련 있는 경험 Top-K 검색
+회사명 + 지원 직무 + 자기소개서 문항 입력
+→ 검색 쿼리 생성
+→ 검색 쿼리를 embedding vector로 변환
+→ Qdrant에서 cosine similarity 기반 검색
+→ 관련 경험 후보 Top-K 반환
+→ 프론트엔드에서 후보 카드로 표시
+```
+- ### 사용자 경험 선택
+
+검색된 경험 후보를 바로 LLM에 전달하지 않고,  
+사용자가 자기소개서에 사용할 경험 하나를 직접 선택
+
+```text
+관련 경험 후보 Top-K
+→ 사용자가 경험 1개 선택
+→ selectedExperienceId 저장
 ```
 
-### 자기소개서 생성
+- ### 자기소개서 생성
 
 ```text
 검색된 경험 context 구성
