@@ -77,7 +77,11 @@ public class ExperienceService {
                 experience.getCategory(),
                 experience.getPeriod(),
                 experience.getTags(),
-                experience.getContent()
-        );
+                experience.getContent());
+    }
+
+    public ExperienceEntity getEntityById(Long id) {
+        return experienceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("경험을 찾을 수 없습니다. id=" + id));
     }
 }
