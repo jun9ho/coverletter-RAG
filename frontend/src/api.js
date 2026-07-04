@@ -21,4 +21,5 @@ export const extractExperiences = async (data) => {
   const response = await api.post("/api/documents/extract-experiences", data);
   return response.data;
 };
+
 export default api;
