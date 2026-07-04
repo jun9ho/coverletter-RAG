@@ -6,6 +6,7 @@ public record CoverLetterGenerateRequest(
         @NotBlank String company,
         @NotBlank String position,
         @NotBlank String question,
-        Integer maxLength
+        Integer maxLength,
+        Long experienceId
 ) {
 }
