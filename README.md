@@ -135,8 +135,8 @@
 본 프로젝트는 간단한 React + Vite 프론트엔드를 제공합니다.
 
 ### 주요 화면
-<img width="1534" height="477" alt="image" src="https://github.com/user-attachments/assets/e8a8185a-4e5d-4719-a2ec-9d2afb0567ed" />
-<img width="1514" height="593" alt="image" src="https://github.com/user-attachments/assets/0d84f221-35e3-4d94-aa86-ea7944de0b5e" />
+<img width="1000" height="400" alt="image" src="https://github.com/user-attachments/assets/64159df9-839f-4745-97bd-a20bbb23866a" />
+<img width="1000" height="400" alt="image" src="https://github.com/user-attachments/assets/9337030f-66d8-446c-8185-046b39d3e8d6" />
 
 ---
 
@@ -160,6 +160,7 @@
 **Retrieval-Augmented Generation** 구조를 적용했습니다.
 
 - ### 긴 텍스트에서 경험 후보 추출
+<img width="1000" height="600" alt="image" src="https://github.com/user-attachments/assets/005aee2f-cfee-4bd2-8253-be46e09770b1" />
 
 ```text
 이력서 / 자기소개서 / 포트폴리오 텍스트 입력
@@ -191,6 +192,8 @@
 → 프론트엔드에서 후보 카드로 표시
 ```
 - ### 사용자 경험 선택
+<img width="750" height="765" alt="image" src="https://github.com/user-attachments/assets/3e97175b-07f7-4767-a496-671e716c79fb" />
+<img width="750" height="300" alt="image" src="https://github.com/user-attachments/assets/4fc40265-1d70-4ca3-b203-40f9df775f3e" />
 
 검색된 경험 후보를 바로 LLM에 전달하지 않고,  
 사용자가 자기소개서에 사용할 경험 하나를 직접 선택
@@ -202,6 +205,7 @@
 ```
 
 - ### 자기소개서 생성
+<img width="1505" height="689" alt="image" src="https://github.com/user-attachments/assets/38c0af23-1468-47ed-b4ad-f42dd435bba8" />
 
 ```text
 검색된 경험 context 구성
